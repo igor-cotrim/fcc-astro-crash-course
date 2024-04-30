@@ -1,31 +1,56 @@
 ---
 import { Image } from "astro:assets";
-import type { CollectionEntry } from "astro:content";
+import { getEntryBySlug, type CollectionEntry } from "astro:content";
+
+import CategoryList from "./CategoryList.astro";
 
 type Props = {
   post: CollectionEntry<"posts">;
 };
 
 const { post } = Astro.props;
+const author = await getEntryBySlug("authors", post.data.author);
 ---
 
 <article>
-  <a href={`/blog/${post.slug}`}>
+  <a
+    href={`/blog/${post.slug}`}
+    aria-label={`Read more about ${post.data.title}`}
+  >
     <Image
       src={post.data.image}
       alt={post.data.title}
       width={600}
       height={600 / 1.5}
-      class="rounded-2xl shadow-xl mb-4 aspect-auto object-cover"
+      format="webp"
+      class="rounded-2xl shadow-xl mb-6 aspect-auto object-cover"
     />
   </a>
+  <div>
+    <CategoryList categories={post.data.categories} />
+  </div>
   <a
     href={`/blog/${post.slug}`}
     class="text-4xl text-zinc-900 font-semibold inline-block"
   >
     <h2>{post.data.title}</h2>
   </a>
-  <p class="text-zinc-500 text-2xl line-clamp-2">
+  <p class="text-zinc-500 text-2xl mb-9 line-clamp-2">
     {post.body}
   </p>
+  <div class="flex justify-between items-center">
+    {
+      author ? (
+        <a
+          href={`/author/${author.slug}`}
+          class="text-zinc-900 text-2xl font-bold"
+        >
+          {author.data.name}
+        </a>
+      ) : null
+    }
+    <span class="text-zinc-700 text-xl">
+      {post.data.date}
+    </span>
+  </div>
 </article>
