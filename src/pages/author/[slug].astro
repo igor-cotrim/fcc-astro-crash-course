@@ -4,14 +4,22 @@ import { getCollection, getEntryBySlug } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Main from "../../components/Main.astro";
 import PostList from "../../components/PostList.astro";
+import Pagination from "../../components/Pagination.astro";
 
 const { slug } = Astro.params;
 const author = await getEntryBySlug("authors", slug as string);
 
 if (!author) return Astro.redirect("/404");
 
+const page = Number(Astro.url.searchParams.get("page")) || 1;
+const postsPerPage = 6;
+const start = postsPerPage * (page - 1);
+const end = start + postsPerPage;
+
 const allPosts = await getCollection("posts");
-const posts = allPosts.filter((post) => post.data.author === author.slug);
+const posts = allPosts
+  .filter((post) => post.data.author === author.slug)
+  .slice(start, end);
 ---
 
 <Layout title={author.data.name}>
@@ -27,5 +35,6 @@ const posts = allPosts.filter((post) => post.data.author === author.slug);
     <div class="mb-60">
       <PostList posts={posts} />
     </div>
+    <Pagination page={page} numberOfPosts={posts.length} />
   </Main>
 </Layout>
